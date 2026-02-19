@@ -1,3 +1,15 @@
+# Company Activity Pipeline - Interview Submission
+
+## Overview
+This repo contains my submission for the Company Activity pipeline and analytics questions.
+
+## Files
+- `Python/`: API ingestion function
+- `SQL/`: Company activity tracking scripts
+- `Question 1 FULL Answers.txt`: Full answer to Question 1 (data model, SQL, ADF flow, Python pseudocode)
+- `Question 2 FULL Answers.txt`: Full answer to Question 2 (optimizations, data quality analysis)
+- `LICENSE`: MIT License
+
 ```
 =====================================================================================
   TRIGGER: trg_daily_0034 (Passes @trigger().outputs.windowStartTime as target_date)
