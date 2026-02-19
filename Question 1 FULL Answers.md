@@ -29,9 +29,9 @@ Question 1:
 
 1.2 -  SQL (from sensible staging tables) to populate Analytics table :
 
-ASSUMPTION: I'm USING postgres SQL syntax
+- ASSUMPTION: I'm USING postgres SQL syntax
 
-INSERT INTO company_activity ( 
+- INSERT INTO company_activity ( 
     company_id, activity_date, company_name, country, industry_tag,
     active_users, events, rolling_7d_active_users, days_since_last_contact, is_churn_risk,
     pipeline_run_id, inserted_at
@@ -313,5 +313,6 @@ def extract_api_to_blob(target_date: date, run_id: str):
 	Even if downstream transformation fails, we at least preserve raw truth in Bronze, which allows full reprocessing.
 
 	I prioritize whatever is hardest to recover from if missed — and a time-windowed external API call is always that thing.
+
 
 
