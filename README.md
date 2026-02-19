@@ -4,11 +4,11 @@
 This repo contains my submission for the Company Activity pipeline and analytics questions.
 
 ## Files
-- `Python/`: API ingestion function
-- `SQL/`: Company activity tracking scripts
+- `Python/`: function to call api
+- `SQL/`: analyticts table population
 - `Question 1 FULL Answers.txt`: Full answer to Question 1 (data model, SQL, ADF flow, Python pseudocode)
 - `Question 2 FULL Answers.txt`: Full answer to Question 2 (optimizations, data quality analysis)
-- `LICENSE`: MIT License
+- `LICENSE`: Apache 2.0
 
 ```
 =====================================================================================
