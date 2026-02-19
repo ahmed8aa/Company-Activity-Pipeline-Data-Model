@@ -26,7 +26,7 @@ Question 1:
 					13- pipeline_run_id
 					
 -----------------------------------------------------------------------------------------------------------------------------------                                          
-
+```
 1.2 -  SQL (from sensible staging tables) to populate Analytics table :
 
 - ASSUMPTION: I'm USING postgres SQL syntax
@@ -126,8 +126,9 @@ DO UPDATE SET
     is_churn_risk           = EXCLUDED.is_churn_risk,
     inserted_at             = EXCLUDED.inserted_at,
     pipeline_run_id         = EXCLUDED.pipeline_run_id;
+```
 ----------------------------------------------------------------------------------------------------------------------------------- 
-
+```
 1.3 - The ADF flow 
 
 
@@ -224,9 +225,9 @@ Linked Services (ls_): Describes the connection to external systems.
 
 Triggers (trg_): Describes the schedule or event.
 
-
+```
 ----------------------------------------------------------------------------------------------------------------------------------- 
-
+```
 1.4 - python function for calling API:
 
 
@@ -299,7 +300,7 @@ def extract_api_to_blob(target_date: date, run_id: str):
 # Example Execution
 # extract_api_to_blob(date(2023, 10, 27), "adf-run-xyz-123")
 
-
+```
 ----------------------------------------------------------------------------------------------------------------------------------- 
 
 
@@ -313,6 +314,7 @@ def extract_api_to_blob(target_date: date, run_id: str):
 	Even if downstream transformation fails, we at least preserve raw truth in Bronze, which allows full reprocessing.
 
 	I prioritize whatever is hardest to recover from if missed — and a time-windowed external API call is always that thing.
+
 
 
 
