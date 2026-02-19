@@ -1,0 +1,60 @@
+Question 2 :
+
+
+2.1 - The Ranked Three optimisation changes:
+
+	Rank 1 :Shift to Incremental Processing via Date Filtering: Add a WHERE date = :target_date clause. 
+		This is the single most impactful change. It transforms the job from a Full Table Scan (which gets slower every day) into a Delta Load. 
+		It solves the 3-hour runtime issue instantly.( Note i did that in the populating stage of the analytics table)
+
+	Rank 2: Add Row Deduplication: Wrap the source in a CTE using ROW_NUMBER(). Because it was mentioned there is mismatches, duplicates from API retries are the most likely culprit. 
+		This ensures the SUM(events) is only calculating unique occurrences.( i used on conflict in the populating stage to avoid this scenario)
+
+	Rank 3: Composite Indexing(CREATE INDEX CONCURRENTLY) (Conditional): If the table is under 100M rows, adding an index on (date, company_id) is a massive performance booster. 
+		However, I rank this third because, in a 30-minute window, a CREATE INDEX statement on a large table might lock the table and block the pipeline. 
+		The first two fixes are "code-only" and safer.
+		
+		i can also consider Explicit Type Casting as mismatches are often caused by company_id being a string in one table and a bigint in another, leading to silent join failures
+
+----------------------------------------------------------------------------------------------------------------------------------- 
+
+2.2 - Risks and Flaws:
+
+	1- There is no date filter which causes to reaggragate all history every time causing inefficency.
+	2- second the question mentioned a mimatach between company_id,date in raw to dashboard this could be several things:
+		
+		- it could be due to a mismatch between time zones so unified time zone might be the answer.
+		- a duplication in data might be exists as a result of retries of api .
+		- i can also consider Explicit Type Casting as mismatches are often caused by company_id being a string in one table and a bigint in another, leading to silent join failures.
+	3- SUM(events) silently absorbs NULL and produces misleading results. This is a silent data quality issue that's very hard to detect downstream.
+	The fix is twofold: enforce a NOT NULL constraint on fact_events.events at ingestion time, and add an explicit check in the query
+			
+----------------------------------------------------------------------------------------------------------------------------------- 
+
+2.3 - one real pipeline performance issue i had before :
+
+	We had multiple pipelines sharing the same scraping logic across different regions. 
+	Two started firing failure alerts while the rest ran cleanly. I pulled the ADF activity run logs 
+	and compared the failing runs against successful ones; the failures were consistently occurring during the scraping stage due to connection timeouts.
+
+	By comparing implementation details, I found that the failing pipelines had been configured with high-concurrency settings to accelerate extraction,
+	 whereas the healthy ones were processing more sequentially. I refactored the failing pipelines to use a throttled, 
+	low-concurrency approach with a small backoff between requests. Both pipelines stabilized immediately, 
+	and I monitored them for several runs before closing the ticket. This trade-off prioritized reliability over raw speed, 
+	ensuring our production data remained consistent and on schedule.
+
+----------------------------------------------------------------------------------------------------------------------------------- 
+
+
+2.4 - Slack Style Update :
+
+	👋 **Pipeline Update – Company Activity Dashboard**
+
+		• **What's changing:** We're adding incremental date filtering to the daily job so it only processes today's data instead of re-scanning the full history — this should bring the runtime down from 3+ hours to under 30 mins.
+
+		• **Dedup fix incoming:** We've identified that API retries were causing duplicate event counts for some company/date combinations. A deduplication layer is being added — expect the `events` numbers for a handful of companies to slightly decrease and become more accurate.
+
+		• **Temporary caveat:** During today's deployment window (~30 mins), the dashboard may show stale data from yesterday's run. No data will be lost.
+
+		• **Watch out for:** If you spot a company where today's metrics look lower than yesterday's, that's likely the dedup fix correcting inflated numbers — not a pipeline failure. Flag anything that looks off and we'll investigate same-day. 🙏
+	
