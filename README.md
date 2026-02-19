@@ -1,4 +1,4 @@
-# Company Activity Pipeline - Interview Submission
+# Company Activity Pipeline
 
 ## Overview
 This repo contains my submission for the Company Activity pipeline and analytics questions.
